@@ -1,0 +1,45 @@
+<html>
+    <body>
+        <div id="reader" width="600px"></div>
+        <div id="result"></div>
+    </body>
+    <head>
+        <title>Scanner</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+        <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+        <script type="text/javascript">
+            var alreadyRequested = [];
+            function onScanSuccess(decodedText, decodedResult) {
+                // make api request to penny.angad.sg/api/quote/<decodedText> and alert the result
+                $.get(`https://penny.angad.sg/api/quote/${decodedText}`, function(data, status){
+                    console.log(alreadyRequested);
+                    if (alreadyRequested.includes(decodedText)) {
+                        return;
+                    }
+                    alreadyRequested.push(decodedText);
+                    // write data in json format
+                    $("#result").html(JSON.stringify(data));
+                });
+            }
+            
+            function onScanFailure(error) {
+                // handle scan failure, usually better to ignore and keep scanning.
+                // for example:
+                console.warn(`Code scan error = ${error}`);
+                $("#result").html("Scanning failed, please try again.");
+            }
+
+            $(document).ready(function() {
+                let html5QrcodeScanner = new Html5QrcodeScanner(
+                    "reader",
+                    { fps: 10, qrbox: {width: 250, height: 250} },
+                    /* verbose= */ false
+                );
+                html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+            });
+
+        </script>
+    </head>
+</html>
